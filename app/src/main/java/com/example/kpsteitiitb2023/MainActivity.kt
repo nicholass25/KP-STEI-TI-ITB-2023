@@ -1,43 +1,44 @@
 package com.example.kpsteitiitb2023
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.kpsteitiitb2023.ui.theme.KPSTEITIITB2023Theme
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            KPSTEITIITB2023Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(findViewById(R.id.toolbar))
+
+        /* Check if Internet connection is available */
+        if (!isConnected()) {
+            Log.d(this.javaClass.name, "Internet connection NOT available")
+
+            Toast.makeText(applicationContext, "Internet connection NOT available", Toast.LENGTH_LONG).show()
         }
     }
-}
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    KPSTEITIITB2023Theme {
-        Greeting("Android")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun isConnected(): Boolean {
+        var result = false
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+        if (capabilities != null) {
+            result = when {
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> true
+                else -> false
+            }
+        }
+        return result
     }
 }
